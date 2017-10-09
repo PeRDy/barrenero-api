@@ -79,6 +79,7 @@ Run manually
 As well as using systemd services you can run miners manually using:
 
 .. code:: bash
+
     ./make run passenger
 
 Configuration
