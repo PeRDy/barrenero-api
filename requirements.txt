@@ -1,0 +1,16 @@
+## System dependencies and utilities
+clinner
+health_check
+ipython
+aiohttp
+
+## Django
+Django
+django-configurations
+django-extensions
+
+## Frontend
+whitenoise
+
+## Django REST Framework
+djangorestframework

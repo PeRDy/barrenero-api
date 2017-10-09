@@ -1,0 +1,15 @@
+[Unit]
+Description=Barrenero API service
+After=docker.service
+Requires=docker.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+WorkingDirectory={{ app.path }}
+ExecStartPre=/usr/bin/python3.6 make create -s barrenero_api.settings:Production passenger
+ExecStart=/usr/bin/nvidia-docker start -a {{ app.name }}
+ExecStop=/usr/bin/nvidia-docker stop -t 2 {{ app.name }}
+Restart=always
+RestartSec=5
