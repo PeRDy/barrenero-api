@@ -100,7 +100,7 @@ def run(*args, **kwargs):
                (('-c', '--code',), {'help': 'Add code folder as volume', 'action': 'store_true'}),
                (('-p', '--ports'), {'help': 'Ports to bind', 'nargs': '*', 'default': ['80:80']}),
                (('--no-nvidia',), {'help': 'Run with docker', 'action': 'store_true'})),
-         parser_opts={'help': 'Run application'})
+         parser_opts={'help': 'Create application container'})
 def create(*args, **kwargs):
     _create_network(kwargs['network'])
 

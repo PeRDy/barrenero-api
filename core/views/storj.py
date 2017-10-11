@@ -1,6 +1,7 @@
 import json
 import shlex
 import subprocess
+from json import JSONDecodeError
 
 from django.conf import settings
 from rest_framework.response import Response
@@ -23,20 +24,23 @@ class Storj(APIView):
         """
         command = f'docker exec {settings.STORJ_CONTAINER_NAME} storjshare status -j'
         result = subprocess.run(shlex.split(command), stdout=subprocess.PIPE, universal_newlines=True)
-        return [{
-            'id': node['id'],
-            'status': node['status'],
-            'config_path': node['configPath'],
-            'uptime': node['uptime'],
-            'restarts': node['restarts'],
-            'peers': node['peers'],
-            'offers': node['offers'],
-            'data_received': node['dataReceivedCount'] if node['dataReceivedCount'] != '...' else None,
-            'delta': node['delta'][:-2] if node['delta'] != '...' else None,
-            'port': node['port'],
-            'shared': node['shared'] if node['shared'] != '...' else None,
-            'shared_percent': node['sharedPercent'] if node['sharedPercent'] != '...' else None,
-        } for node in json.loads(result.stdout)]
+        try:
+            return [{
+                'id': node['id'],
+                'status': node['status'],
+                'config_path': node['configPath'],
+                'uptime': node['uptime'],
+                'restarts': node['restarts'],
+                'peers': node['peers'],
+                'offers': node['offers'],
+                'data_received': node['dataReceivedCount'] if node['dataReceivedCount'] != '...' else None,
+                'delta': node['delta'][:-2] if node['delta'] != '...' else None,
+                'port': node['port'],
+                'shared': node['shared'] if node['shared'] != '...' else None,
+                'shared_percent': node['sharedPercent'] if node['sharedPercent'] != '...' else None,
+            } for node in json.loads(result.stdout)]
+        except JSONDecodeError:
+            return []
 
     def get(self, request, format=None):
         """

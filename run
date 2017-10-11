@@ -83,7 +83,7 @@ def prospector(*args, **kwargs) -> List[List[str]]:
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Django runserver'})
 def runserver(*args, **kwargs) -> List[List[str]]:
-    return build() + manage('runserver 0.0.0.0:8000', *args)
+    return build() + manage('runserver', *args)
 
 
 @command(command_type=CommandType.SHELL,

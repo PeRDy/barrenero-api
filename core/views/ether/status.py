@@ -30,23 +30,22 @@ class Status(APIView):
         """
         Check Ether miner current status.
         """
-        current_time = datetime.datetime.utcnow()
-        with open('logs/miner/ether/values.log') as f:
-            try:
+        try:
+            with open('logs/miner/ether/values.log') as f:
                 logs = deque(f, maxlen=10)
                 values = [datetime.datetime.strptime(json.loads(e)['timestamp'], '%Y-%m-%d %H:%M:%S') for e in logs]
 
                 if not values:
                     raise ValueError('No value entries found')
 
-                values.append(current_time)
+                values.append(datetime.datetime.utcnow())
                 deltas = [(x2 - x1).seconds < settings.ETHER_MAX_IDLE for x1, x2 in zip(values[:-1], values[1:])]
                 current_status = StatusState.ACTIVE if all(deltas) else StatusState.INACTIVE
-            except ValueError:
-                current_status = StatusState.INACTIVE
-            except Exception:
-                logger.exception('Cannot check miner status')
-                current_status = StatusState.UNKNOWN
+        except ValueError:
+            current_status = StatusState.INACTIVE
+        except Exception:
+            logger.exception('Cannot check miner status')
+            current_status = StatusState.UNKNOWN
 
         return current_status.value
 
@@ -55,14 +54,14 @@ class Status(APIView):
         Gathers Ether miner hashrate per graphic card.
         :return:
         """
-        with open('logs/miner/ether/values.log') as f:
-            try:
+        try:
+            with open('logs/miner/ether/values.log') as f:
                 log_entries = deque(f, maxlen=50)
                 values = [tuple(json.loads(e)['value'].values()) for e in log_entries]
                 values_per_gpu = list(zip(*values))
                 hashrate = [{'hashrate': sum(v) / len(v), 'graphic_card': i} for i, v in enumerate(values_per_gpu)]
-            except:
-                hashrate = None
+        except:
+            hashrate = None
 
         return hashrate
 
