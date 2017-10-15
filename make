@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import uuid
+from functools import wraps
 
 logger = logging.getLogger('cli')
 
@@ -32,6 +33,18 @@ except ImportError:
 docker_cli = docker.from_env()
 
 
+def superuser(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not os.geteuid() == 0:
+            logger.error('Script must be run as root')
+            return -1
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @command(command_type=CommandType.SHELL_WITH_HELP,
          args=((('--registry',), {'help': 'Docker registry'}),
                (('--name',), {'help': 'Docker image name', 'default': 'barrenero-api'}),
@@ -41,6 +54,14 @@ def build(*args, **kwargs):
     tag = '{name}:{tag}'.format(**kwargs)
 
     cmd = shlex.split('docker build -t {tag} .'.format(tag=tag)) + list(args)
+    return [cmd]
+
+
+@command(command_type=CommandType.SHELL_WITH_HELP,
+         parser_opts={'help': 'Restart Systemd service'})
+@superuser
+def restart(*args, **kwargs):
+    cmd = shlex.split('service barrenero_api restart')
     return [cmd]
 
 
@@ -117,11 +138,8 @@ def create(*args, **kwargs):
 @command(command_type=CommandType.PYTHON,
          args=((('--path',), {'help': 'Barrenero full path', 'default': '/usr/local/lib/barrenero'}),),
          parser_opts={'help': 'Install the application in the system'})
+@superuser
 def install(*args, **kwargs):
-    if not os.geteuid() == 0:
-        logger.error('Script must be run as root')
-        return -1
-
     path = os.path.abspath(os.path.join(kwargs['path'], 'barrenero-api'))
 
     # Jinja2 builder
