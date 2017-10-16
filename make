@@ -32,6 +32,13 @@ except ImportError:
 
 docker_cli = docker.from_env()
 
+DONATE_TEXT = '''
+This project is free and open sourced, you can use it, spread the word, contribute to the codebase and help us donating:
+* Ether: 0x566d41b925ed1d9f643748d652f4e66593cba9c9
+* Bitcoin: 1Jtj2m65DN2UsUzxXhr355x38T6pPGhqiA
+* PayPal: barrenerobot@gmail.com
+'''
+
 
 def superuser(func):
     @wraps(func)
@@ -45,11 +52,23 @@ def superuser(func):
     return wrapper
 
 
+def donate(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+
+        logger.info(DONATE_TEXT)
+
+        return result
+    return wrapper
+
+
 @command(command_type=CommandType.SHELL_WITH_HELP,
          args=((('--registry',), {'help': 'Docker registry'}),
                (('--name',), {'help': 'Docker image name', 'default': 'barrenero-api'}),
                (('--tag',), {'help': 'Docker image tag', 'default': 'latest'})),
          parser_opts={'help': 'Docker build for local environment'})
+@donate
 def build(*args, **kwargs):
     tag = '{name}:{tag}'.format(**kwargs)
 
@@ -59,6 +78,7 @@ def build(*args, **kwargs):
 
 @command(command_type=CommandType.SHELL_WITH_HELP,
          parser_opts={'help': 'Restart Systemd service'})
+@donate
 @superuser
 def restart(*args, **kwargs):
     cmd = shlex.split('service barrenero_api restart')
@@ -101,6 +121,7 @@ def _create_network(name):
                (('-p', '--ports'), {'help': 'Ports to bind', 'nargs': '*', 'default': ['80:80']}),
                (('--no-nvidia',), {'help': 'Run with docker', 'action': 'store_true'})),
          parser_opts={'help': 'Run application'})
+@donate
 def run(*args, **kwargs):
     _create_network(kwargs['network'])
 
@@ -122,6 +143,7 @@ def run(*args, **kwargs):
                (('-p', '--ports'), {'help': 'Ports to bind', 'nargs': '*', 'default': ['80:80']}),
                (('--no-nvidia',), {'help': 'Run with docker', 'action': 'store_true'})),
          parser_opts={'help': 'Create application container'})
+@donate
 def create(*args, **kwargs):
     _create_network(kwargs['network'])
 
@@ -138,6 +160,7 @@ def create(*args, **kwargs):
 @command(command_type=CommandType.PYTHON,
          args=((('--path',), {'help': 'Barrenero full path', 'default': '/usr/local/lib/barrenero'}),),
          parser_opts={'help': 'Install the application in the system'})
+@donate
 @superuser
 def install(*args, **kwargs):
     path = os.path.abspath(os.path.join(kwargs['path'], 'barrenero-api'))
