@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import logging
+from itertools import chain
 from typing import Dict, List
 from urllib.parse import urljoin
 
@@ -84,7 +85,7 @@ class Wallet(APIView):
                     'balance_usd': balance_usd,
                 }
             except aiohttp.ClientResponseError:
-                logger.exception('Cannot retrieve Etherscan account info')
+                logger.exception('Cannot retrieve Ethplorer account info')
                 tokens = None
             except Exception as e:
                 logger.error('Wrong response: %s', str(e))
@@ -92,45 +93,84 @@ class Wallet(APIView):
 
         return tokens
 
-    async def _transactions(self, session: 'aiohttp.ClientSession', account: str, number: int = 10) -> List[Dict]:
+    async def _eth_transactions(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
         """
-        Query Etherscan and retrieve last transactions.
+        Query Ethplorer and retrieve last transactions.
 
         :param session: aiohttp Session.
         :param account: Account address.
-        :param number: Number of transactions to retrieve.
         :return: Wallet transactions.
         """
-        params = {
-            'module': 'account',
-            'action': 'txlist',
-            'address': account,
-            'sort': 'desc',
-            'startblock': 0,
-            'endblock': 99_999_999,
-            'page': 1,
-            'offset': number,
-            'apikey': settings.ETHERSCAN['token'],
-        }
-        async with session.get(settings.ETHERSCAN['url'], params=params) as response:
+        url = urljoin(settings.ETHPLORER["url"], f'/getAddressTransactions/{account}')
+        params = {'apiKey': settings.ETHPLORER['token']}
+        async with session.get(url, params=params) as response:
             try:
                 response.raise_for_status()
                 transactions = [{
+                    'token': {
+                        'name': 'Ether',
+                        'symbol': 'ETH',
+                    },
                     'hash': t['hash'],
-                    'contract_address': t['contractAddress'],
                     'source': t['from'],
                     'destination': t['to'],
-                    'value': float(t['value']) / 10 ** 18,
-                    'timestamp': datetime.datetime.fromtimestamp(int(t['timeStamp'])),
-                } for t in (await response.json())['result']]
+                    'value': float(t['value']),
+                    'timestamp': datetime.datetime.fromtimestamp(int(t['timestamp'])),
+                } for t in (await response.json(content_type='text/html'))]
             except aiohttp.ClientResponseError:
-                logger.exception('Cannot retrieve Etherscan transactions')
+                logger.exception('Cannot retrieve Ethplorer transactions')
                 transactions = None
             except Exception as e:
                 logger.error('Wrong response: %s', str(e))
                 transactions = None
 
         return transactions
+
+    async def _token_operations(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
+        """
+        Query Ethplorer and retrieve last token operations.
+
+        :param session: aiohttp Session.
+        :param account: Account address.
+        :return: Wallet transactions.
+        """
+        url = urljoin(settings.ETHPLORER["url"], f'/getAddressHistory/{account}')
+        params = {'apiKey': settings.ETHPLORER['token']}
+        async with session.get(url, params=params) as response:
+            try:
+                response.raise_for_status()
+                transactions = [{
+                    'token': {
+                        'name': t['tokenInfo']['name'],
+                        'symbol': t['tokenInfo']['symbol'],
+                    },
+                    'hash': t['transactionHash'],
+                    'source': t['from'],
+                    'destination': t['to'],
+                    'value': float(t['value']) * 10 ** (-t['tokenInfo']['decimals']),
+                    'timestamp': datetime.datetime.fromtimestamp(int(t['timestamp'])),
+                } for t in (await response.json(content_type='text/html'))['operations']]
+            except aiohttp.ClientResponseError:
+                logger.exception('Cannot retrieve Ethplorer token operations')
+                transactions = None
+            except Exception as e:
+                logger.error('Wrong response: %s', str(e))
+                transactions = None
+
+        return transactions
+
+    async def _transactions(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
+        """
+        Query Ethplorer and retrieve last token operations.
+
+        :param session: aiohttp Session.
+        :param account: Account address.
+        :return: Wallet transactions.
+        """
+        eth_tx = await self._eth_transactions(session, account) or []
+        token_ops = await self._token_operations(session, account) or []
+
+        return sorted(chain(eth_tx, token_ops), key=lambda x: x['timestamp'], reverse=True)
 
     async def _get(self, account):
         """

@@ -5,14 +5,14 @@ from rest_framework import serializers
 class Token(serializers.Serializer):
     name = serializers.CharField(label=_('Name'))
     symbol = serializers.CharField(label=_('Symbol'))
-    balance = serializers.FloatField(label=_('Balance'))
-    price_usd = serializers.FloatField(label=_('Token to USD conversion price'))
-    balance_usd = serializers.FloatField(label=_('Balance in USD'))
+    balance = serializers.FloatField(label=_('Balance'), required=False)
+    price_usd = serializers.FloatField(label=_('Token to USD conversion price'), required=False)
+    balance_usd = serializers.FloatField(label=_('Balance in USD'), required=False)
 
 
 class Transaction(serializers.Serializer):
+    token = Token()
     hash = serializers.CharField(label=_('Transaction hash'))
-    contract_address = serializers.CharField(label=_('Contract address'), allow_blank=True)
     source = serializers.CharField(label=_('Source account'))
     destination = serializers.CharField(label=_('Destination account'))
     value = serializers.FloatField(label=_('Transaction value'))
