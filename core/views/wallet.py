@@ -65,9 +65,9 @@ class Wallet(APIView):
                 tokens = {t['tokenInfo']['symbol']: {
                     'name': t['tokenInfo']['name'],
                     'symbol': t['tokenInfo']['symbol'],
-                    'balance': t['balance'],
+                    'balance': t['balance'] * 10 ** (-t['tokenInfo']['decimals']),
                     'price_usd': t['tokenInfo']['price']['rate'],
-                    'balance_usd': t['balance'] * t['tokenInfo']['price']['rate'],
+                    'balance_usd': t['balance'] * 10 ** (-t['tokenInfo']['decimals']) * t['tokenInfo']['price']['rate'],
                 } for t in result.get('tokens', [])}
 
                 # Gets ETH/USD price
