@@ -1,4 +1,5 @@
 import json
+import logging
 import shlex
 import subprocess
 from json import JSONDecodeError
@@ -10,6 +11,8 @@ from rest_framework.views import APIView
 from core.serializers.storj import Node
 
 __all__ = ['Storj']
+
+logger = logging.getLogger(__name__)
 
 
 class Storj(APIView):
@@ -32,7 +35,7 @@ class Storj(APIView):
                 'uptime': node['uptime'],
                 'restarts': node['restarts'],
                 'peers': node['peers'],
-                'offers': node['offers'],
+                'allocs': node['allocs'],
                 'data_received': node['dataReceivedCount'] if node['dataReceivedCount'] != '...' else None,
                 'delta': node['delta'][:-2] if node['delta'] != '...' else None,
                 'port': node['port'],
@@ -40,6 +43,7 @@ class Storj(APIView):
                 'shared_percent': node['sharedPercent'] if node['sharedPercent'] != '...' else None,
             } for node in json.loads(result.stdout)]
         except JSONDecodeError:
+            logger.exception("Error retrieving storj status")
             return []
 
     def get(self, request, format=None):

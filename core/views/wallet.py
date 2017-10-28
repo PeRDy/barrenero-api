@@ -66,9 +66,9 @@ class Wallet(APIView):
                 tokens = {t['tokenInfo']['symbol']: {
                     'name': t['tokenInfo']['name'],
                     'symbol': t['tokenInfo']['symbol'],
-                    'balance': t['balance'] * 10 ** (-t['tokenInfo']['decimals']),
+                    'balance': t['balance'] * 10 ** (-int(t['tokenInfo']['decimals'])),
                     'price_usd': t['tokenInfo']['price']['rate'],
-                    'balance_usd': t['balance'] * 10 ** (-t['tokenInfo']['decimals']) * float(
+                    'balance_usd': t['balance'] * 10 ** (-int(t['tokenInfo']['decimals'])) * float(
                         t['tokenInfo']['price']['rate']),
                 } for t in result.get('tokens', [])}
 
@@ -148,7 +148,7 @@ class Wallet(APIView):
                     'hash': t['transactionHash'],
                     'source': t['from'],
                     'destination': t['to'],
-                    'value': float(t['value']) * 10 ** (-t['tokenInfo']['decimals']),
+                    'value': float(t['value']) * 10 ** (-int(t['tokenInfo']['decimals'])),
                     'timestamp': datetime.datetime.fromtimestamp(int(t['timestamp'])),
                 } for t in (await response.json(content_type='text/html'))['operations']]
             except aiohttp.ClientResponseError:

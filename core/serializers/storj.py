@@ -9,7 +9,7 @@ class Node(serializers.Serializer):
     uptime = serializers.CharField(label=_('Uptime'))
     restarts = serializers.IntegerField(label=_('# of restarts'))
     peers = serializers.IntegerField(label=_('# of peers'))
-    offers = serializers.IntegerField(label=_('# of offers'))
+    allocs = serializers.IntegerField(label=_('# of allocs'))
     data_received = serializers.IntegerField(label=_('Total data received'), allow_null=True)
     delta = serializers.IntegerField(label=_('Delta (ms)'), allow_null=True)
     port = serializers.IntegerField(label=_('Connection port'))
