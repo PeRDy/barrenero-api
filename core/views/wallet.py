@@ -43,7 +43,7 @@ class Wallet(APIView):
                 logger.exception('Cannot retrieve Etherscan price')
                 price = None
             except Exception as e:
-                logger.error('Wrong response: %s', str(e))
+                logger.exception('Wrong response: %s', str(e))
                 price = None
 
         return price
@@ -62,15 +62,6 @@ class Wallet(APIView):
             try:
                 response.raise_for_status()
                 result = await response.json(content_type='text/html')
-                # All tokens
-                tokens = {t['tokenInfo']['symbol']: {
-                    'name': t['tokenInfo']['name'],
-                    'symbol': t['tokenInfo']['symbol'],
-                    'balance': t['balance'] * 10 ** (-int(t['tokenInfo']['decimals'])),
-                    'price_usd': t['tokenInfo']['price']['rate'],
-                    'balance_usd': t['balance'] * 10 ** (-int(t['tokenInfo']['decimals'])) * float(
-                        t['tokenInfo']['price']['rate']),
-                } for t in result.get('tokens', [])}
 
                 # Gets ETH/USD price
                 price = await self._price(session)
@@ -78,18 +69,35 @@ class Wallet(APIView):
                 balance_usd = price_usd * result['ETH']['balance'] if price else None
 
                 # Add Ether token
-                tokens['ETH'] = {
-                    'name': 'Ether',
-                    'symbol': 'ETH',
-                    'balance': result['ETH']['balance'],
-                    'price_usd': price_usd,
-                    'balance_usd': balance_usd,
+                tokens = {
+                    'ETH': {
+                        'name': 'Ether',
+                        'symbol': 'ETH',
+                        'balance': result['ETH']['balance'],
+                        'price_usd': price_usd,
+                        'balance_usd': balance_usd
+                    }
                 }
+
+                # All tokens
+                for t in result.get('tokens', []):
+                    decimals = 10 ** (-int(t['tokenInfo']['decimals']))
+                    token = {
+                        'name': t['tokenInfo']['name'],
+                        'symbol': t['tokenInfo']['symbol'],
+                        'balance': t['balance'] * decimals,
+                    }
+
+                    if t['tokenInfo']['price']:
+                        token['price_usd'] = t['tokenInfo']['price']['rate']
+                        token['balance_usd'] = t['balance'] * decimals * float(t['tokenInfo']['price']['rate'])
+
+                    tokens[t['tokenInfo']['symbol']] = token
             except aiohttp.ClientResponseError:
                 logger.exception('Cannot retrieve Ethplorer account info')
                 tokens = None
             except Exception as e:
-                logger.error('Wrong response: %s', str(e))
+                logger.exception('Wrong response: %s', str(e))
                 tokens = None
 
         return tokens
@@ -122,7 +130,7 @@ class Wallet(APIView):
                 logger.exception('Cannot retrieve Ethplorer transactions')
                 transactions = None
             except Exception as e:
-                logger.error('Wrong response: %s', str(e))
+                logger.exception('Wrong response: %s', str(e))
                 transactions = None
 
         return transactions
@@ -155,7 +163,7 @@ class Wallet(APIView):
                 logger.exception('Cannot retrieve Ethplorer token operations')
                 transactions = None
             except Exception as e:
-                logger.error('Wrong response: %s', str(e))
+                logger.exception('Wrong response: %s', str(e))
                 transactions = None
 
         return transactions

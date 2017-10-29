@@ -54,7 +54,7 @@ class Nanopool(APIView):
                 logger.exception('Cannot retrieve Nanopool account info')
                 account_info = {}
             except Exception as e:
-                logger.error('Wrong response: %s', e)
+                logger.exception('Wrong response: %s', e)
                 account_info = {}
 
         return account_info
@@ -81,7 +81,7 @@ class Nanopool(APIView):
                 logger.exception('Cannot retrieve Nanopool account info')
                 payment = None
             except Exception as e:
-                logger.error('Wrong response: %s', e)
+                logger.exception('Wrong response: %s', e)
                 payment = None
 
         return payment
