@@ -13,7 +13,7 @@ class LoggingMixin:
     """
     Logging configuration.
     """
-    LOG_DIR = os.path.abspath(os.environ.get('DJANGO_APP_LOG_DIR', '/srv/apps/barrenero-api/logs'))
+    LOG_DIR = os.path.abspath(os.environ.get('DJANGO_APP_LOG_DIR', '/srv/apps/barrenero-api/logs/api'))
 
     LOGGING = {
         'version': 1,
