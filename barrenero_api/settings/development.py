@@ -12,12 +12,8 @@ class Development(Base):
     DEBUG = True
 
     CLINNER_DEFAULT_ARGS = {
-        'runserver': '0.0.0.0:8000',
-        'passenger': '--environment development '
-                     '--log-file /srv/apps/barrenero-api/logs/passenger.log '
-                     '--python python3.6 '
-                     '--app-type wsgi '
-                     '--startup-file barrenero_api/wsgi.py',
+        'runserver': '0.0.0.0:80',
+        'uwsgi': '--ini /srv/apps/barrenero-api/uwsgi.ini',
         'unit_tests': '--no-input',
     }
 

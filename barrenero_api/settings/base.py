@@ -13,7 +13,7 @@ class LoggingMixin:
     """
     Logging configuration.
     """
-    LOG_DIR = os.path.abspath(os.environ.get('DJANGO_APP_LOG_DIR', '/srv/apps/barrenero-api/logs/api'))
+    LOG_DIR = os.path.abspath(os.environ.get('DJANGO_APP_LOG_DIR', '/srv/apps/barrenero-api/logs'))
 
     LOGGING = {
         'version': 1,
@@ -148,7 +148,6 @@ class Base(LoggingMixin, Configuration):
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'django.middleware.security.SecurityMiddleware',

@@ -86,11 +86,10 @@ def runserver(*args, **kwargs) -> List[List[str]]:
     return build() + manage('runserver', *args)
 
 
-@command(command_type=CommandType.SHELL,
-         parser_opts={'help': 'Run passenger server'})
-def passenger(*args, **kwargs) -> List[List[str]]:
-    cmd = [PASSENGER, 'start']
-    cmd += ['--address', os.environ['APP_HOST'], '--port', os.environ['APP_PORT']]
+@command(command_type=CommandType.SHELL)
+def uwsgi(*args, **kwargs) -> List[List[str]]:
+    http = '{}:{}'.format('', os.environ['APP_PORT'])
+    cmd = ['uwsgi', '--http', http]
     cmd += args
     return build() + [cmd]
 

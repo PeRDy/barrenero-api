@@ -1,7 +1,5 @@
-from django.conf.urls import include, url
-
-from barrenero_api.urls.api import v1
+from django.urls import include, path
 
 urlpatterns = [
-    url(r'v1/', include(v1, namespace='v1')),
+    path('v1/', include(('barrenero_api.urls.api.v1', 'v1'), namespace='v1')),
 ]

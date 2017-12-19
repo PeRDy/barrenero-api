@@ -1,8 +1,9 @@
 ## System dependencies and utilities
 clinner
-health_check
+health_check>=3.4
 ipython
 aiohttp
+uwsgi
 
 ## Django
 Django
