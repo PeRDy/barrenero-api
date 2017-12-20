@@ -23,13 +23,8 @@ class Hashrate(serializers.Serializer):
     twenty_four_hours = serializers.FloatField(label=_('24h'))
 
 
-class Worker(serializers.Serializer):
-    id = serializers.CharField(label=_('Worker name'))
-    hashrate = serializers.FloatField(label=_('Current hashrate'))
-
-
 class Nanopool(serializers.Serializer):
     balance = Balance(label=_('Current balance'))
     hashrate = Hashrate(label=_('Hashrate'))
-    workers = serializers.ListField(child=Worker(), label=_('Worker info'))
+    workers = serializers.DictField(child=serializers.FloatField(), label=_('Worker info'))
     last_payment = Payment(required=False, label=_('Last payment'))

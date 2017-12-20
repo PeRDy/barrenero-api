@@ -12,14 +12,12 @@ auth_patterns = (
 
 ether_patterns = (
     [
-        path('nanopool/', ether.Nanopool.as_view(), name='nanopool'),
-        path('status/', ether.Status.as_view(), name='status'),
     ],
     'ether')
 
 urlpatterns = [
-    path('ether/', include(ether_patterns)),
     path('auth/', include(auth_patterns)),
+    path('ether/', ether.Ether.as_view(), name='ether'),
     path('status/', status.Status.as_view(), name='status'),
     path('storj/', storj.Storj.as_view(), name='storj'),
     path('restart/', restart.RestartService.as_view(), name='restart'),
