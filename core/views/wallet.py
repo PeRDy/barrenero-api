@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.serializers import wallet
+from core.utils import retry, get_event_loop
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class Wallet(APIView):
     """
     serializer_class = wallet.Wallet
 
+    @retry(3)
     async def _price(self, session: 'aiohttp.ClientSession') -> Dict:
         """
         Query Etherscan and retrieve currency Ether price.
@@ -48,6 +50,7 @@ class Wallet(APIView):
 
         return price
 
+    @retry(3)
     async def _tokens(self, session: 'aiohttp.ClientSession', account: str) -> Dict:
         """
         Query Ethplorer and retrieve current wallet tokens.
@@ -102,6 +105,7 @@ class Wallet(APIView):
 
         return tokens
 
+    @retry(3)
     async def _eth_transactions(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
         """
         Query Ethplorer and retrieve last transactions.
@@ -129,12 +133,16 @@ class Wallet(APIView):
             except aiohttp.ClientResponseError:
                 logger.exception('Cannot retrieve Ethplorer transactions')
                 transactions = None
+            except asyncio.TimeoutError:
+                logger.exception('Timeout')
+                transactions = None
             except Exception as e:
                 logger.exception('Wrong response: %s', str(e))
                 transactions = None
 
         return transactions
 
+    @retry(3)
     async def _token_operations(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
         """
         Query Ethplorer and retrieve last token operations.
@@ -161,6 +169,9 @@ class Wallet(APIView):
                 } for t in (await response.json(content_type='text/html'))['operations']]
             except aiohttp.ClientResponseError:
                 logger.exception('Cannot retrieve Ethplorer token operations')
+                transactions = None
+            except asyncio.TimeoutError:
+                logger.exception('Timeout')
                 transactions = None
             except Exception as e:
                 logger.exception('Wrong response: %s', str(e))
@@ -203,11 +214,7 @@ class Wallet(APIView):
         """
         Query Etherscan and retrieve current wallet info.
         """
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        loop = get_event_loop()
         data = loop.run_until_complete(self._get(request.user.account))
 
         serializer = self.serializer_class(data)
