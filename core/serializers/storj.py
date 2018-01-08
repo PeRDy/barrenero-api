@@ -15,4 +15,7 @@ class Node(serializers.Serializer):
     port = serializers.IntegerField(label=_('Connection port'))
     shared = serializers.CharField(label=_('Total space shared'), allow_null=True)
     shared_percent = serializers.IntegerField(label=_('Percent of space shared'), allow_null=True)
+    response_time = serializers.FloatField(label=_('Node response time'), allow_null=True)
+    reputation = serializers.IntegerField(label=_('Node reputation'), allow_null=True)
+    version = serializers.CharField(label=_('Node version'), allow_null=True)
 

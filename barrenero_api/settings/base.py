@@ -290,3 +290,8 @@ class Base(LoggingMixin, Configuration):
 
     # Storj container name to call commands with docker
     STORJ_CONTAINER_NAME = 'barrenero-miner-storj'
+
+    # Storj API
+    STORJ_API = {
+        'url': 'https://api.storj.io/',
+    }

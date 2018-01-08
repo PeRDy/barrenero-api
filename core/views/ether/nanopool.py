@@ -1,14 +1,10 @@
-import asyncio
 import datetime
 import logging
 from typing import Dict, Union
 
 import aiohttp
 from django.conf import settings
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from core.serializers.ether import nanopool
 from core.utils import retry
 
 logger = logging.getLogger(__name__)
