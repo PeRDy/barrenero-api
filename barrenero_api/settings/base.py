@@ -282,10 +282,10 @@ class Base(LoggingMixin, Configuration):
     # Number of seconds since last entry to consider ether mining inactive
     ETHER_MAX_IDLE = 300
 
-    # Mining systemd services
-    SYSTEMD_SERVICES = {
-        'Ether': 'barrenero_miner_ether',
-        'Storj': 'barrenero_miner_storj',
+    # Mining container names
+    MINERS = {
+        'barrenero-miner-ether': 'Ether',
+        'barrenero-miner-storj': 'Storj',
     }
 
     # Storj container name to call commands with docker

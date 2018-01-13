@@ -1,3 +1,4 @@
+import json
 import logging
 import shlex
 import subprocess
@@ -44,19 +45,17 @@ class Status(APIView):
 
     def _services_status(self):
         """
-        Gathers systemd services status.
+        Gathers docker status.
         """
-        services = []
-        for service_name, service in settings.SYSTEMD_SERVICES.items():
-            status = subprocess.run(shlex.split(f'systemctl is-active {service}'), stdout=subprocess.PIPE,
-                                    universal_newlines=True).stdout.strip()
-            services.append({'name': service_name, 'status': status})
+        str_format = '{{.Names}}'
+        active = subprocess.run(shlex.split(f"docker ps --filter='name=barrenero-miner' --format='{str_format}'"),
+                                stdout=subprocess.PIPE, universal_newlines=True).stdout.strip().split('\n')
 
-        return services
+        return [{'name': v, 'status': 'active' if k in active else 'inactive'} for k, v in settings.MINERS.items()]
 
     def get(self, request, format=None):
         """
-        Retrieve graphic cards and systemd services status.
+        Retrieve graphic cards and services status.
         """
         data = {
             'graphics': self._graphics_status(),

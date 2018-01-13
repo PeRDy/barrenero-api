@@ -96,8 +96,6 @@ def _docker_flags(name, code, ports, network):
     flags.append('-v {}:/srv/apps/barrenero-api/logs'.format(os.path.join("/var/log/barrenero")))
 
     # System volumes
-    flags.append('-v /run/systemd:/run/systemd')
-    flags.append('-v /bin/systemctl:/bin/systemctl')
     flags.append('-v /var/run/docker.sock:/var/run/docker.sock')
 
     # Flags
