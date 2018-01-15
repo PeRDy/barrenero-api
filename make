@@ -39,6 +39,8 @@ This project is free and open sourced, you can use it, spread the word, contribu
 * PayPal: barrenerobot@gmail.com
 '''
 
+PATH = os.path.realpath(os.path.dirname(__file__))
+
 
 def superuser(func):
     @wraps(func)
@@ -99,7 +101,7 @@ def _docker_flags(name, code, ports, network):
     flags.append('-v /var/run/docker.sock:/var/run/docker.sock')
 
     # Flags
-    flags.append('--env-file=.env')
+    flags.append('--env-file=/etc/barrenero/setup.cfg')
     flags.append('--rm --name={}'.format(name))
     flags.append('--network={}'.format(network))
     flags.append(' '.join(['-p {}'.format(port) for port in ports]))
@@ -157,44 +159,30 @@ def create(*args, **kwargs):
 
 
 @command(command_type=CommandType.PYTHON,
-         args=((('--path',), {'help': 'Barrenero full path', 'default': '/usr/local/lib/barrenero'}),),
+         args=((('--config-path',), {'help': 'Barrenero full path', 'default': '/etc/barrenero'}),
+               (('--worker-name',), {'help': 'Barrenero worker name', 'default': 'Barrenero'})),
          parser_opts={'help': 'Install the application in the system'})
 @donate
 @superuser
 def install(*args, **kwargs):
-    path = os.path.abspath(os.path.join(kwargs['path'], 'barrenero-api'))
+    config_path = os.path.abspath(os.path.join(kwargs['config_path'], 'barrenero-api'))
 
     # Jinja2 builder
-    j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(path, 'templates')))
+    j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(PATH, 'templates')))
     systemd_j2_context = {
-        'app': {
-            'name': 'barrenero-api',
-            'path': path,
-        },
         'settings': {
             'secret_key': uuid.uuid4().hex,
             'ethplorer': 'freekey',
+            'worker_name': kwargs['worker_name']
         },
     }
 
-    # Create app directory
-    logger.info("[Barrenero API] Install app under %s", path)
-    shutil.rmtree(path, ignore_errors=True)
-    shutil.copytree('.', path)
-
     # Create setup file
     logger.info("[Barrenero API] Defining config file")
-    with open(os.path.join(path, '.env'), 'w') as f:
-        f.write(j2_env.get_template('env.jinja2').render(systemd_j2_context))
+    with open(os.path.join(config_path, 'setup.cfg'), 'w') as f:
+        f.write(j2_env.get_template('setup.cfg.jinja2').render(systemd_j2_context))
 
-    # Create Systemd unit
-    logger.info("[Barrenero API] Create Systemd unit and enable it")
-    with open('/etc/systemd/system/barrenero_api.service', 'w') as f:
-        f.write(j2_env.get_template('barrenero_api.service.jinja2').render(systemd_j2_context))
-    subprocess.run(shlex.split('systemctl enable barrenero_api.service'))
-    subprocess.run(shlex.split('systemctl daemon-reload'))
-
-    logger.info('[Barrenero API] Remember to configure API in file %s', os.path.join(path, '.env'))
+    logger.info('[Barrenero API] Remember to configure API in file %s', os.path.join(config_path, 'setup.cfg'))
 
 
 if __name__ == '__main__':
