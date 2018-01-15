@@ -32,60 +32,22 @@ This project is free and open sourced, you can use it, spread the word, contribu
 Requirements
 ------------
 
-* Python 3.5 or newer. Download `here <https://www.python.org/>`_.
 * Docker. `Official docs <https://docs.docker.com/engine/installation/>`_.
 
 Quick start
 -----------
 
-1. Install services:
+1. Configure api parameters in *setup.cfg* file. Parameters explained below.
+
+2. Run the service:
 
     .. code:: console
 
-        sudo ./make install
-
-2. Move to installation folder:
-
-    .. code:: console
-
-        cd /usr/local/lib/barrenero/barrenero-api/
-
-3. Configure api parameters in *.env* file. Parameters explained below.
-
-4. Build the service:
-
-    .. code:: console
-
-        ./make build
-
-5. Reboot or restart Systemd unit:
-
-    .. code:: console
-
-        sudo service barrenero_api restart
-
-Systemd
--------
-The project provides a service file for Systemd that will be installed. These service files gives a reliable way to run
-each miner, as well as overclocking scripts.
-
-To check a miner service status:
-
-.. code:: bash
-
-    service barrenero_api status
-
-Run manually
-------------
-As well as using systemd services you can run miners manually using:
-
-.. code:: bash
-
-    ./make run passenger
+        docker run -p 80:80 --env-file=/etc/barrenero/barrenero-api/setup.cfg perdy/barrenero-api:latest uwsgi
 
 Configuration
 -------------
-Defines the following keys in `.env` file:
+Defines the following keys in *setup.cfg* file:
 
 Django Secret Key
 ^^^^^^^^^^^^^^^^^

@@ -5,6 +5,7 @@ Run script.
 import argparse
 import os
 import shlex
+from functools import wraps
 from typing import List
 
 import configurations.importer
@@ -15,7 +16,25 @@ from clinner.run.main import HealthCheckMixin, Main as ClinnerMain
 PYTHON = 'python3.6'
 COVERAGE = 'coverage'
 PROSPECTOR = 'prospector'
-PASSENGER = 'passenger'
+UWSGI = 'uwsgi'
+
+DONATE_TEXT = '''
+This project is free and open sourced, you can use it, spread the word, contribute to the codebase and help us donating:
+* Ether: 0x566d41b925ed1d9f643748d652f4e66593cba9c9
+* Bitcoin: 1Jtj2m65DN2UsUzxXhr355x38T6pPGhqiA
+* PayPal: barrenerobot@gmail.com
+'''
+
+
+def donate(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+
+        print(DONATE_TEXT)
+
+        return result
+    return wrapper
 
 
 class Main(HealthCheckMixin, ClinnerMain):
@@ -48,6 +67,7 @@ class Main(HealthCheckMixin, ClinnerMain):
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Django manage commands'})
+@donate
 def manage(*args, **kwargs) -> List[List[str]]:
     cmd = shlex.split(f'{PYTHON} manage.py')
     cmd += args
@@ -56,24 +76,28 @@ def manage(*args, **kwargs) -> List[List[str]]:
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Django migrate command'})
+@donate
 def migrate(*args, **kwargs) -> List[List[str]]:
     return manage('migrate', *args)
 
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Django collectstatic command'})
+@donate
 def collectstatic(*args, **kwargs) -> List[List[str]]:
     return manage('collectstatic', *args)
 
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Migrate and collectstatic'})
+@donate
 def build(*args, **kwargs) -> List[List[str]]:
     return migrate('--fake-initial') + collectstatic('--noinput')
 
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Run prospector'})
+@donate
 def prospector(*args, **kwargs) -> List[List[str]]:
     cmd = [PROSPECTOR]
     cmd += args
@@ -82,20 +106,24 @@ def prospector(*args, **kwargs) -> List[List[str]]:
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Django runserver'})
+@donate
 def runserver(*args, **kwargs) -> List[List[str]]:
     return build() + manage('runserver', *args)
 
 
-@command(command_type=CommandType.SHELL)
-def uwsgi(*args, **kwargs) -> List[List[str]]:
+@command(command_type=CommandType.SHELL,
+         parser_opts={'help': 'Start server'})
+@donate
+def start(*args, **kwargs) -> List[List[str]]:
     http = '{}:{}'.format('', os.environ['APP_PORT'])
-    cmd = ['uwsgi', '--http', http]
+    cmd = [UWSGI, '--http', http]
     cmd += args
     return build() + [cmd]
 
 
 @command(command_type=CommandType.SHELL,
          parser_opts={'help': 'Django shell'})
+@donate
 def shell(*args, **kwargs) -> List[List[str]]:
     return manage('shell_plus', *args)
 
