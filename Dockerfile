@@ -1,4 +1,5 @@
-FROM nvidia/cuda:9.0-runtime-ubuntu17.04
+FROM nvidia/cuda:9.1-runtime-ubuntu17.04
+LABEL maintainer="José Antonio Perdiguero López <perdy.hh@gmail.com>"
 
 ENV APP=barrenero-api
 
@@ -19,6 +20,7 @@ RUN apt-get update && \
         python3-pip \
         git \
         curl && \
+    apt-get clean && \
     rm -rf /tmp/* \
         /var/tmp/* \
         /var/lib/apt/lists/* \
@@ -31,6 +33,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
     apt-get update && \
     apt-get install -y docker-ce && \
+    apt-get clean && \
     rm -rf /tmp/* \
         /var/tmp/* \
         /var/lib/apt/lists/* \
@@ -47,11 +50,6 @@ COPY requirements.txt constraints.txt /srv/apps/$APP/
 RUN python3.6 -m pip install --upgrade pip && \
     python3.6 -m pip install --no-cache-dir -r requirements.txt -c constraints.txt && \
     rm -rf $HOME/.cache/pip/*
-
-# Clean up
-RUN apt-get clean && \
-    apt-get purge --auto-remove -y \
-        apt-transport-https
 
 # Copy application
 COPY . /srv/apps/$APP/
