@@ -10,8 +10,6 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         software-properties-common \
-        python3.6-dev \
-        python3-pip \
         git \
         curl && \
     apt-get clean && \
