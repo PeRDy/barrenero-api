@@ -22,7 +22,14 @@ RUN apt-get update && \
 
 RUN add-apt-repository -y ppa:jonathonf/python-3.6 && \
     apt-get update && \
-    apt-get install -y python3.6 python3-pip
+    apt-get install -y python3.6 python3-pip python3.6-dev && \
+    apt-get clean && \
+    rm -rf /tmp/* \
+        /var/tmp/* \
+        /var/lib/apt/lists/* \
+        /var/cache/apt/archives/*.deb \
+        /var/cache/apt/archives/partial/*.deb \
+        /var/cache/apt/*.bin
 
 # Install docker
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
