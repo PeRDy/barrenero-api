@@ -31,7 +31,7 @@ This project is free and open sourced, you can use it, spread the word, contribu
 ## Quick start
 
 1. Configure api parameters in *setup.cfg* file. Parameters explained below.
-2. Run the service: `docker run -p 80:80 --env-file=/etc/barrenero/barrenero-api/setup.cfg perdy/barrenero-api:latest uwsgi`
+2. Run the service: `docker run -p 80:80 --env-file=/etc/barrenero/api/setup.cfg perdy/barrenero-api:latest uwsgi`
 
 ## Configuration
 Defines the following keys in *setup.cfg* file:

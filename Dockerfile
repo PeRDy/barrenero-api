@@ -1,13 +1,7 @@
-FROM nvidia/cuda:9.1-runtime-ubuntu17.04
+FROM nvidia/cuda:9.1-runtime
 LABEL maintainer="José Antonio Perdiguero López <perdy.hh@gmail.com>"
 
 ENV APP=barrenero-api
-
-RUN apt-get update && \
-    apt-get install -y \
-        locales \
-        locales-all
-ENV LANG='es_ES.UTF-8' LANGUAGE='es_ES.UTF-8:es' LC_ALL='es_ES.UTF-8'
 
 # Install system requirements
 RUN apt-get update && \
@@ -27,6 +21,10 @@ RUN apt-get update && \
         /var/cache/apt/archives/*.deb \
         /var/cache/apt/archives/partial/*.deb \
         /var/cache/apt/*.bin
+
+RUN add-apt-repository -y ppa:jonathonf/python-3.6 && \
+    apt-get update && \
+    apt-get install -y python3.6 python3-pip
 
 # Install docker
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
