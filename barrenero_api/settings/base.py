@@ -178,7 +178,7 @@ class Base(LoggingMixin, Configuration):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '.data/barrenero_api.db'
+            'NAME': 'config/barrenero_api.db'
         },
     }
 
