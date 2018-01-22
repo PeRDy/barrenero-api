@@ -267,7 +267,7 @@ class Base(LoggingMixin, Configuration):
     # Third party APIs
     NANOPOOL = {
         'url': 'https://api.nanopool.org/v1/eth/',
-        'worker': 'Barrenero',
+        'worker': values.Value(environ_name='WORKER_NAME'),
         'token': None
     }
     ETHERSCAN = {
