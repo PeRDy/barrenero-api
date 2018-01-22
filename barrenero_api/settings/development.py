@@ -13,7 +13,7 @@ class Development(Base):
 
     CLINNER_DEFAULT_ARGS = {
         'runserver': '0.0.0.0:80',
-        'uwsgi': '--ini /srv/apps/barrenero-api/uwsgi.ini',
+        'start': '--ini /srv/apps/barrenero-api/uwsgi.ini',
         'unit_tests': '--no-input',
     }
 
