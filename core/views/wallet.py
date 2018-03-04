@@ -137,7 +137,7 @@ class Wallet(APIView):
                     'source': t['from'],
                     'destination': t['to'],
                     'value': float(t['value']) * 10e-18,
-                    'timestamp': datetime.datetime.fromtimestamp(int(t['timestamp'])),
+                    'timestamp': datetime.datetime.fromtimestamp(int(t['timeStamp'])),
                 } for t in (await response.json())['result']]
             except aiohttp.ClientResponseError:
                 logger.exception('Cannot retrieve Etherscan transactions')
