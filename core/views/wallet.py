@@ -114,9 +114,18 @@ class Wallet(APIView):
         :param account: Account address.
         :return: Wallet transactions.
         """
-        url = urljoin(settings.ETHPLORER["url"], f'/getAddressTransactions/{account}')
-        params = {'apiKey': settings.ETHPLORER['token']}
-        async with session.get(url, params=params) as response:
+        params = {
+            'module': 'account',
+            'action': 'txlist',
+            'apikey': settings.ETHERSCAN['token'],
+            'address': account,
+            'startblock': '0',
+            'endblock': '99999999',
+            'sort': 'desc',
+            'page': '1',
+            'offset': '10',
+        }
+        async with session.get(settings.ETHERSCAN['url'], params=params) as response:
             try:
                 response.raise_for_status()
                 transactions = [{
@@ -127,11 +136,11 @@ class Wallet(APIView):
                     'hash': t['hash'],
                     'source': t['from'],
                     'destination': t['to'],
-                    'value': float(t['value']),
+                    'value': float(t['value']) * 10e-18,
                     'timestamp': datetime.datetime.fromtimestamp(int(t['timestamp'])),
-                } for t in (await response.json(content_type='text/html'))]
+                } for t in (await response.json())['result']]
             except aiohttp.ClientResponseError:
-                logger.exception('Cannot retrieve Ethplorer transactions')
+                logger.exception('Cannot retrieve Etherscan transactions')
                 transactions = None
             except asyncio.TimeoutError:
                 logger.exception('Timeout')
