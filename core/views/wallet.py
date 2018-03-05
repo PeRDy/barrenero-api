@@ -136,7 +136,7 @@ class Wallet(APIView):
                     'hash': t['hash'],
                     'source': t['from'],
                     'destination': t['to'],
-                    'value': float(t['value']) * 10e-18,
+                    'value': float(t['value']) * 10e-19,
                     'timestamp': datetime.datetime.fromtimestamp(int(t['timeStamp'])),
                 } for t in (await response.json())['result']]
             except aiohttp.ClientResponseError:
