@@ -20,14 +20,14 @@ __all__ = ['Wallet']
 
 class Wallet(APIView):
     """
-    Wallet status provided by Etherscan.
+    Wallet status provided by Etherscan and Ethplorer.
     """
     serializer_class = wallet.Wallet
 
     @retry(3)
     async def _price(self, session: 'aiohttp.ClientSession') -> Dict:
         """
-        Query Etherscan and retrieve currency Ether price.
+        Query Etherscan to retrieve currency Ether price.
 
         :param session: aiohttp Session.
         :return: Currency price.
@@ -53,7 +53,7 @@ class Wallet(APIView):
     @retry(3)
     async def _tokens(self, session: 'aiohttp.ClientSession', account: str) -> Dict:
         """
-        Query Ethplorer and retrieve current wallet tokens.
+        Query Ethplorer to retrieve current wallet tokens.
 
         :param session: aiohttp Session.
         :param account: Account address.
@@ -64,7 +64,7 @@ class Wallet(APIView):
         async with session.get(url=url, params=params) as response:
             try:
                 response.raise_for_status()
-                result = await response.json(content_type='text/html')
+                result = await response.json()
 
                 # Gets ETH/USD price
                 price = await self._price(session)
@@ -108,7 +108,7 @@ class Wallet(APIView):
     @retry(3)
     async def _eth_transactions(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
         """
-        Query Ethplorer and retrieve last transactions.
+        Query Etherscan to retrieve last transactions.
 
         :param session: aiohttp Session.
         :param account: Account address.
@@ -154,7 +154,7 @@ class Wallet(APIView):
     @retry(3)
     async def _token_operations(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
         """
-        Query Ethplorer and retrieve last token operations.
+        Query Ethplorer to retrieve last token operations.
 
         :param session: aiohttp Session.
         :param account: Account address.
@@ -175,7 +175,7 @@ class Wallet(APIView):
                     'destination': t['to'],
                     'value': float(t['value']) * 10 ** (-int(t['tokenInfo']['decimals'])),
                     'timestamp': datetime.datetime.fromtimestamp(int(t['timestamp'])),
-                } for t in (await response.json(content_type='text/html'))['operations']]
+                } for t in (await response.json())['operations']]
             except aiohttp.ClientResponseError:
                 logger.exception('Cannot retrieve Ethplorer token operations')
                 transactions = None
@@ -190,7 +190,7 @@ class Wallet(APIView):
 
     async def _transactions(self, session: 'aiohttp.ClientSession', account: str) -> List[Dict]:
         """
-        Query Ethplorer and retrieve last token operations.
+        Query Etherscan and Ethplorer to retrieve last operations.
 
         :param session: aiohttp Session.
         :param account: Account address.
@@ -221,7 +221,7 @@ class Wallet(APIView):
 
     def get(self, request, format=None):
         """
-        Query Etherscan and retrieve current wallet info.
+        Query Etherscan and Ethplorer to retrieve current wallet info.
         """
         loop = get_event_loop()
         data = loop.run_until_complete(self._get(request.user.account))
