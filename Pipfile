@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+clinner = "*"
+health-check = ">=3.4"
+ipython = "*"
+aiohttp = "*"
+django-configurations = "*"
+django-extensions = "*"
+whitenoise = "*"
+djangorestframework = "*"
+uWSGI = "*"
+Django = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"
