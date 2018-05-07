@@ -50,8 +50,8 @@ class Main(HealthCheckMixin, ClinnerMain):
 
         os.environ['APP_HOST'] = host
         os.environ['APP_PORT'] = port
-        os.environ['DJANGO_SETTINGS_MODULE'], os.environ['DJANGO_CONFIGURATION'] = self.settings.rsplit(':', 1)
-        os.environ['HEALTH_CHECK_SETTINGS'] = self.settings
+        os.environ['DJANGO_SETTINGS_MODULE'], os.environ['DJANGO_CONFIGURATION'] = self.args.settings.rsplit(':', 1)
+        os.environ['HEALTH_CHECK_SETTINGS'] = self.args.settings
 
         # Mark django-configurations as installed to avoid setup error
         configurations.importer.install()
