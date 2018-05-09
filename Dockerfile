@@ -1,24 +1,43 @@
-FROM python:alpine
+FROM nvidia/cuda:9.1-base
 LABEL maintainer="José Antonio Perdiguero López <perdy@perdy.io>"
 
 ENV APP=barrenero-api
+ENV LC_ALL='C.UTF-8' PYTHONIOENCODING='utf-8'
 
 # Install system dependencies
-ENV RUNTIME_PACKAGES sqlite-libs git docker
-ENV BUILD_PACKAGES build-base linux-headers sqlite-dev
-RUN apk --no-cache add $RUNTIME_PACKAGES
+ENV RUNTIME_PACKAGES sqlite git docker
+ENV BUILD_PACKAGES build-essential sqlite-dev
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends $RUNTIME_PACKAGES apt-transport-https software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends python3.6 python3-pip && \
+    apt-get remove --purge -y apt-transport-https software-properties-common && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* \
+        /var/cache/apt/archives/*.deb \
+        /var/cache/apt/archives/partial/*.deb \
+        /var/cache/apt/*.bin
 
 # Create project dirs
 RUN mkdir -p /srv/apps/$APP/logs
 WORKDIR /srv/apps/$APP
 
-# Install pip requirements
+## Install ethminer and python requirements
 COPY Pipfile Pipfile.lock /srv/apps/$APP/
-RUN apk --no-cache add $BUILD_PACKAGES && \
-    python -m pip install --no-cache-dir --upgrade pip pipenv && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends $BUILD_PACKAGES && \
+    python3.6 -m pip install --no-cache-dir --upgrade pip pipenv && \
     pipenv install --system --deploy --ignore-pipfile && \
-    rm -rf $HOME/.cache/pip/* && \
-    apk del $BUILD_PACKAGES
+    apt-get remove --purge -y $BUILD_PACKAGES && \
+    apt-get clean && \
+    rm -rf /tmp/* \
+        /var/tmp/* \
+        /var/lib/apt/lists/* \
+        /var/cache/apt/archives/*.deb \
+        /var/cache/apt/archives/partial/*.deb \
+        /var/cache/apt/*.bin \
+        $HOME/.cache/pip/*
 
 # Copy application
 COPY . /srv/apps/$APP/
