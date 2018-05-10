@@ -5,14 +5,14 @@ ENV APP=barrenero-api
 ENV LC_ALL='C.UTF-8' PYTHONIOENCODING='utf-8'
 
 # Install system dependencies
-ENV RUNTIME_PACKAGES sqlite git docker
-ENV BUILD_PACKAGES build-essential sqlite-dev
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends $RUNTIME_PACKAGES apt-transport-https software-properties-common && \
+ENV RUNTIME_PACKAGES sqlite git docker python3.6 python3-pip
+ENV BUILD_PACKAGES build-essential libsqlite3-dev python3.6-dev
+RUN apt-get update -m && \
+    apt-get install -y --no-install-recommends software-properties-common && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
-    apt-get install -y --no-install-recommends python3.6 python3-pip && \
-    apt-get remove --purge -y apt-transport-https software-properties-common && \
+    apt-get install -y --no-install-recommends $RUNTIME_PACKAGES && \
+    apt-get remove --purge -y software-properties-common && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* \
         /var/cache/apt/archives/*.deb \
@@ -25,7 +25,7 @@ WORKDIR /srv/apps/$APP
 
 ## Install ethminer and python requirements
 COPY Pipfile Pipfile.lock /srv/apps/$APP/
-RUN apt-get update && \
+RUN apt-get update -m && \
     apt-get install -y --no-install-recommends $BUILD_PACKAGES && \
     python3.6 -m pip install --no-cache-dir --upgrade pip pipenv && \
     pipenv install --system --deploy --ignore-pipfile && \
